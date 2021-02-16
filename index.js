@@ -3,8 +3,12 @@ const morgan = require('morgan')
 
 const app = express()
 
+morgan.token('data', (request, response) => {
+  return JSON.stringify(request.body)
+})
+
 app.use(express.json())
-app.use(morgan('tiny'))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
 let persons = [
   {
@@ -71,7 +75,6 @@ app.post('/api/persons', (request, response) => {
       error: 'number missing'
     })
   }
-
 
   const person = {
     name: body.name,
