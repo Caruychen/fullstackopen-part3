@@ -59,7 +59,9 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.get('/info', (request, response) => {
   const date = new Date()
-  response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`)
+  Person.find({}).then(persons => {
+    response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`)
+  })
 })
 
 app.post('/api/persons', (request, response) => {
@@ -69,25 +71,23 @@ app.post('/api/persons', (request, response) => {
       error: 'name missing'
     })
   }
-  else if (persons.map(person => person.name).includes(body.name)) {
-    return response.status(400).json({
-      error: 'name must be unique'
-    })
-  }
+  // else if (persons.map(person => person.name).includes(body.name)) {
+  //   return response.status(400).json({
+  //     error: 'name must be unique'
+  //   })
+  // }
   if (!body.number) {
     return response.status(400).json({
       error: 'number missing'
     })
   }
 
-  const person = {
+  const person = new Person({
     name: body.name,
-    number: body.number || "",
-    id: generateId()
-  }
+    number: body.number
+  })
 
-  persons = persons.concat(person)
-  response.json(person)
+  person.save().then(result => response.json(person))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
