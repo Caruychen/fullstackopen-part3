@@ -14,8 +14,10 @@ app.use(express.static('build'))
 app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
-app.get('/api/persons', (request, response) => {
-  Person.find({}).then(persons => response.json(persons))
+app.get('/api/persons', (request, response, next) => {
+  Person.find({})
+    .then(persons => response.json(persons))
+    .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -30,11 +32,13 @@ app.get('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
   const date = new Date()
-  Person.find({}).then(persons => {
-    response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`)
-  })
+  Person.find({})
+    .then(persons => {
+      response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`)
+    })
+    .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response) => {
@@ -69,7 +73,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     name: body.name,
     number: body.number
   }
-  
+
   Person.findByIdAndUpdate(request.params.id, person, { new: true })
     .then(updatedPerson => {
       response.json(updatedPerson)
